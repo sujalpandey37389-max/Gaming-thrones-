@@ -1,0 +1,8 @@
+{
+  "name": "Remix Steel Horizon: 3D Mech Arena",
+  "description": "An interactive 3D sci-fi mech combat arena game and real-time game architecture showcase built with Three.js, procedural PBR graphics, and Web Audio synth.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
