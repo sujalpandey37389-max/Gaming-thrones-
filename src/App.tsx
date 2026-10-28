@@ -1,11 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { GameEngine } from './game/GameEngine';
-import { GameState, GameStats, GameDevTuning, DEFAULT_DEV_TUNING, WeaponType } from './game/constants';
+import {
+  GameState,
+  GameStats,
+  GameDevTuning,
+  DEFAULT_DEV_TUNING,
+  WeaponType,
+  TankUpgrades,
+  MAX_HEALTH,
+  MAX_SHIELD,
+  MAX_HOUSE_HP,
+} from './game/constants';
 import { TitleScreen } from './components/TitleScreen';
 import { GameHUD } from './components/GameHUD';
 import { PauseModal } from './components/PauseModal';
 import { GameOverModal } from './components/GameOverModal';
 import { GameDevGuideModal } from './components/GameDevGuideModal';
+import { MobileControlsOverlay } from './components/MobileControlsOverlay';
+import { TankUpgradeModal } from './components/TankUpgradeModal';
+import { LandscapeEnforcer } from './components/LandscapeEnforcer';
 import { soundEngine } from './audio/SoundEngine';
 
 export default function App() {
@@ -19,17 +32,35 @@ export default function App() {
     kills: 0,
     combo: 0,
     maxCombo: 0,
-    health: 100,
-    shield: 100,
+    health: MAX_HEALTH,
+    shield: MAX_SHIELD,
     boostStamina: 100,
     canBoost: true,
     timeAlive: 0,
     enemiesRemaining: 0,
     currentWeapon: 'plasma_repeater',
+    playerMode: 'pilot',
+    canEnterTank: false,
+    houseHp: MAX_HOUSE_HP,
+    maxHouseHp: MAX_HOUSE_HP,
+    scrap: 150,
+    tankUpgrades: {
+      hullArmorLevel: 1,
+      cannonsLevel: 1,
+      autoloaderLevel: 1,
+      engineLevel: 1,
+    },
   });
   const [isMuted, setIsMuted] = useState<boolean>(soundEngine.getMuted());
   const [showGuideModal, setShowGuideModal] = useState<boolean>(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState<boolean>(false);
   const [tuning, setTuning] = useState<GameDevTuning>({ ...DEFAULT_DEV_TUNING });
+
+  // Mobile / Touch controls state (auto-enabled on touch screens or mobile viewports)
+  const [showMobileControls, setShowMobileControls] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth <= 1024;
+  });
 
   useEffect(() => {
     if (!canvasMountRef.current) return;
@@ -94,8 +125,51 @@ export default function App() {
     engineRef.current?.switchWeapon(type);
   };
 
+  const handleVirtualMove = (x: number, y: number) => {
+    engineRef.current?.setVirtualMove(x, y);
+  };
+
+  const handleFireChange = (isFiring: boolean) => {
+    engineRef.current?.setFiring(isFiring);
+  };
+
+  const handleBoost = () => {
+    engineRef.current?.triggerBoost();
+  };
+
+  const handleEnterExitTank = () => {
+    engineRef.current?.enterOrExitTank();
+  };
+
+  const handleAimDirection = (dx: number, dy: number) => {
+    engineRef.current?.setAimFromVector(dx, dy);
+  };
+
+  const handleScreenAim = (clientX: number, clientY: number) => {
+    engineRef.current?.setAimFromScreen(clientX, clientY);
+  };
+
+  const handleUpgradeTank = (type: keyof TankUpgrades) => {
+    engineRef.current?.upgradeTank(type);
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'u' || e.key === 'U') {
+        if (gameState === 'playing' || gameState === 'paused') {
+          setShowUpgradeModal((prev) => !prev);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gameState]);
+
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-slate-950 font-sans select-none">
+    <div className="relative w-screen h-screen overflow-hidden bg-slate-950 font-sans select-none touch-none">
+      {/* Strict Landscape Orientation Enforcer */}
+      <LandscapeEnforcer />
+
       {/* Isolated WebGL Canvas Mount Container */}
       <div ref={canvasMountRef} className="absolute inset-0 z-0" />
 
@@ -118,6 +192,34 @@ export default function App() {
           onOpenGuide={() => setShowGuideModal(true)}
           onPause={handlePauseGame}
           onSwitchWeapon={handleSwitchWeapon}
+          onEnterExitTank={handleEnterExitTank}
+          onOpenUpgrades={() => setShowUpgradeModal(true)}
+          isMobileControlsVisible={showMobileControls}
+          onToggleMobileControls={() => setShowMobileControls((prev) => !prev)}
+        />
+      )}
+
+      {/* Mobile Touch Controls Overlay */}
+      {gameState === 'playing' && showMobileControls && (
+        <MobileControlsOverlay
+          stats={stats}
+          onMove={handleVirtualMove}
+          onFireChange={handleFireChange}
+          onBoost={handleBoost}
+          onSwitchWeapon={handleSwitchWeapon}
+          onEnterExitTank={handleEnterExitTank}
+          onOpenUpgrades={() => setShowUpgradeModal(true)}
+          onAimDirection={handleAimDirection}
+          onScreenAim={handleScreenAim}
+        />
+      )}
+
+      {/* Tanker Upgrade Modification Bay Modal */}
+      {showUpgradeModal && (
+        <TankUpgradeModal
+          stats={stats}
+          onClose={() => setShowUpgradeModal(false)}
+          onUpgrade={handleUpgradeTank}
         />
       )}
 

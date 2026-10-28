@@ -27,15 +27,19 @@ export const PauseModal: React.FC<PauseModalProps> = ({
         <div className="flex flex-col space-y-2.5 mb-6">
           <button
             onClick={onResume}
-            className="w-full flex items-center justify-center space-x-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold py-2.5 px-4 rounded-sm transition-colors"
+            onTouchStart={(e) => {
+              e.preventDefault();
+              onResume();
+            }}
+            className="w-full flex items-center justify-center space-x-2 bg-cyan-600 hover:bg-cyan-500 active:scale-95 text-slate-950 font-bold py-3 px-4 rounded-sm transition-all cursor-pointer touch-manipulation"
           >
             <Play className="w-4 h-4 fill-slate-950" />
-            <span>RESUME (ESC)</span>
+            <span>RESUME (CONTINUE)</span>
           </button>
 
           <button
             onClick={onOpenGuide}
-            className="w-full flex items-center justify-center space-x-2 bg-cyan-950/70 hover:bg-cyan-900 border border-cyan-600/50 text-cyan-300 font-medium py-2.5 px-4 rounded-sm transition-colors text-xs"
+            className="w-full flex items-center justify-center space-x-2 bg-cyan-950/70 hover:bg-cyan-900 active:scale-95 border border-cyan-600/50 text-cyan-300 font-medium py-2.5 px-4 rounded-sm transition-all text-xs cursor-pointer touch-manipulation"
           >
             <BookOpen className="w-4 h-4" />
             <span>GAME ARCHITECTURE & TUNING</span>
@@ -43,7 +47,11 @@ export const PauseModal: React.FC<PauseModalProps> = ({
 
           <button
             onClick={onRestart}
-            className="w-full flex items-center justify-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium py-2.5 px-4 rounded-sm transition-colors text-xs"
+            onTouchStart={(e) => {
+              e.preventDefault();
+              onRestart();
+            }}
+            className="w-full flex items-center justify-center space-x-2 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 font-medium py-3 px-4 rounded-sm transition-all text-xs cursor-pointer touch-manipulation"
           >
             <RotateCcw className="w-4 h-4" />
             <span>RESTART MISSION</span>
@@ -51,7 +59,11 @@ export const PauseModal: React.FC<PauseModalProps> = ({
 
           <button
             onClick={onTitle}
-            className="w-full flex items-center justify-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 font-medium py-2.5 px-4 rounded-sm transition-colors text-xs"
+            onTouchStart={(e) => {
+              e.preventDefault();
+              onTitle();
+            }}
+            className="w-full flex items-center justify-center space-x-2 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-400 hover:text-slate-200 font-medium py-3 px-4 rounded-sm transition-all text-xs cursor-pointer touch-manipulation"
           >
             <Home className="w-4 h-4" />
             <span>EXIT TO TITLE</span>

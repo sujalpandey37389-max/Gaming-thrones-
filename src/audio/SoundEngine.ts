@@ -172,6 +172,38 @@ class SoundEngine {
     whiteNoise.stop(t + duration);
   }
 
+  public playCriticalHit() {
+    if (this.isMuted) return;
+    this.initCtx();
+    if (!this.ctx || !this.masterGain) return;
+
+    const t = this.ctx.currentTime;
+    // Resonant high-impact double chime with metallic bite
+    const osc1 = this.ctx.createOscillator();
+    const osc2 = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc1.type = 'triangle';
+    osc1.frequency.setValueAtTime(1174.66, t);
+    osc1.frequency.exponentialRampToValueAtTime(1760.0, t + 0.12);
+
+    osc2.type = 'square';
+    osc2.frequency.setValueAtTime(587.33, t);
+    osc2.frequency.exponentialRampToValueAtTime(880.0, t + 0.08);
+
+    gain.gain.setValueAtTime(0.35, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(this.masterGain);
+
+    osc1.start(t);
+    osc2.start(t);
+    osc1.stop(t + 0.17);
+    osc2.stop(t + 0.17);
+  }
+
   public playDash() {
     if (this.isMuted) return;
     this.initCtx();
@@ -266,6 +298,90 @@ class SoundEngine {
 
     osc.start(t);
     osc.stop(t + 0.66);
+  }
+
+  public playTankMount() {
+    if (this.isMuted) return;
+    this.initCtx();
+    if (!this.ctx || !this.masterGain) return;
+
+    const t = this.ctx.currentTime;
+    // Mechanical hatch slide + heavy diesel turbine power up
+    const osc1 = this.ctx.createOscillator();
+    const osc2 = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(60, t);
+    osc1.frequency.exponentialRampToValueAtTime(160, t + 0.35);
+
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(180, t);
+    osc2.frequency.linearRampToValueAtTime(420, t + 0.25);
+    osc2.frequency.exponentialRampToValueAtTime(80, t + 0.45);
+
+    gain.gain.setValueAtTime(0.45, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(this.masterGain);
+
+    osc1.start(t);
+    osc2.start(t);
+    osc1.stop(t + 0.52);
+    osc2.stop(t + 0.52);
+  }
+
+  public playUpgrade() {
+    if (this.isMuted) return;
+    this.initCtx();
+    if (!this.ctx || !this.masterGain) return;
+
+    // Resonant triumphant mechanical upgrade chime
+    const freqs = [329.63, 440.0, 554.37, 659.25, 880.0];
+    freqs.forEach((freq, idx) => {
+      if (!this.ctx || !this.masterGain) return;
+      const t = this.ctx.currentTime + idx * 0.055;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = idx === freqs.length - 1 ? 'triangle' : 'sawtooth';
+      osc.frequency.setValueAtTime(freq, t);
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.02, t + 0.22);
+
+      gain.gain.setValueAtTime(0.24, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+
+      osc.connect(gain);
+      gain.connect(this.masterGain);
+
+      osc.start(t);
+      osc.stop(t + 0.32);
+    });
+  }
+
+  public playFootstep() {
+    if (this.isMuted) return;
+    this.initCtx();
+    if (!this.ctx || !this.masterGain) return;
+
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(80 + Math.random() * 20, t);
+    osc.frequency.exponentialRampToValueAtTime(30, t + 0.06);
+
+    gain.gain.setValueAtTime(0.08, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.07);
+
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+
+    osc.start(t);
+    osc.stop(t + 0.08);
   }
 
   public startAmbientMusic() {
